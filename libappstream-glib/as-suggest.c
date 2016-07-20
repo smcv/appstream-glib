@@ -62,6 +62,8 @@ as_suggest_finalize (GObject *object)
 static void
 as_suggest_init (AsSuggest *suggest)
 {
+	AsSuggestPrivate *priv = GET_PRIVATE (suggest);
+	priv->ids = g_ptr_array_new_with_free_func (g_free);
 }
 
 static void
@@ -85,8 +87,8 @@ as_suggest_class_init (AsSuggestClass *klass)
 AsSuggestKind
 as_suggest_kind_from_string (const gchar *kind)
 {
-	if (g_strcmp0 (kind, "source") == 0)
-		return AS_SUGGEST_KIND_SOURCE;
+	if (g_strcmp0 (kind, "upstream") == 0)
+		return AS_SUGGEST_KIND_UPSTREAM;
 	return AS_SUGGEST_KIND_UNKNOWN;
 }
 
@@ -103,8 +105,8 @@ as_suggest_kind_from_string (const gchar *kind)
 const gchar *
 as_suggest_kind_to_string (AsSuggestKind kind)
 {
-	if (kind == AS_SUGGEST_KIND_SOURCE)
-		return "source";
+	if (kind == AS_SUGGEST_KIND_UPSTREAM)
+		return "upstream";
 	return NULL;
 }
 
@@ -126,9 +128,26 @@ as_suggest_get_ids (AsSuggest *suggest)
 }
 
 /**
+ * as_suggest_get_kind:
+ * @suggest: a #AsSuggest instance.
+ *
+ * Gets the suggest kind.
+ *
+ * Returns: the #AsSuggestKind
+ *
+ * Since: 0.5.18
+ **/
+AsSuggestKind
+as_suggest_get_kind (AsSuggest *suggest)
+{
+	AsSuggestPrivate *priv = GET_PRIVATE (suggest);
+	return priv->kind;
+}
+
+/**
  * as_suggest_set_kind:
  * @suggest: a #AsSuggest instance.
- * @kind: the #AsSuggestKind, e.g. %AS_SUGGEST_KIND_THUMBNAIL.
+ * @kind: the #AsSuggestKind, e.g. %AS_SUGGEST_KIND_UPSTREAM.
  *
  * Sets the suggest kind.
  *
@@ -174,11 +193,18 @@ as_suggest_node_insert (AsSuggest *suggest, GNode *parent, AsNodeContext *ctx)
 {
 	AsSuggestPrivate *priv = GET_PRIVATE (suggest);
 	GNode *n;
+	guint i;
 
-	n = as_node_insert (parent, "suggest", priv->url,
+	n = as_node_insert (parent, "suggest", NULL,
 			    AS_NODE_INSERT_FLAG_NONE,
 			    "type", as_suggest_kind_to_string (priv->kind),
 			    NULL);
+	for (i = 0; i < priv->ids->len; i++) {
+		const gchar *id = g_ptr_array_index (priv->ids, i);
+		as_node_insert (n, "id", id,
+				AS_NODE_INSERT_FLAG_NONE,
+				NULL);
+	}
 	return n;
 }
 
@@ -199,19 +225,17 @@ gboolean
 as_suggest_node_parse (AsSuggest *suggest, GNode *node,
 		       AsNodeContext *ctx, GError **error)
 {
-	AsSuggestPrivate *priv = GET_PRIVATE (suggest);
+	AsNode *c;
 	const gchar *tmp;
-	gchar *taken;
 
 	tmp = as_node_get_attribute (node, "type");
 	if (tmp == NULL)
-		as_suggest_set_kind (suggest, AS_SUGGEST_KIND_SOURCE);
+		as_suggest_set_kind (suggest, AS_SUGGEST_KIND_UPSTREAM);
 	else
 		as_suggest_set_kind (suggest, as_suggest_kind_from_string (tmp));
-	taken = as_node_take_data (node);
-	if (taken != NULL) {
-		g_free (priv->url);
-		priv->url = taken;
+	for (c = node->children; c != NULL; c = c->next) {
+		if (as_node_get_tag (c) == AS_TAG_ID)
+			as_suggest_add_id (suggest, as_node_get_data (c));
 	}
 	return TRUE;
 }
@@ -233,26 +257,6 @@ gboolean
 as_suggest_node_parse_dep11 (AsSuggest *im, GNode *node,
 			   AsNodeContext *ctx, GError **error)
 {
-	GNode *n;
-	const gchar *tmp;
-
-	for (n = node->children; n != NULL; n = n->next) {
-		tmp = as_yaml_node_get_key (n);
-		if (g_strcmp0 (tmp, "height") == 0)
-			as_suggest_set_height (im, as_yaml_node_get_value_as_int (n));
-		else if (g_strcmp0 (tmp, "width") == 0)
-			as_suggest_set_width (im, as_yaml_node_get_value_as_int (n));
-		else if (g_strcmp0 (tmp, "url") == 0) {
-			const gchar *media_base_url = as_node_context_get_media_base_url (ctx);
-			if (media_base_url != NULL) {
-				g_autofree gchar *url = NULL;
-				url = g_build_path ("/", media_base_url, as_yaml_node_get_value (n), NULL);
-				as_suggest_set_url (im, url);
-			} else {
-				as_suggest_set_url (im, as_yaml_node_get_value (n));
-			}
-		}
-	}
 	return TRUE;
 }
 

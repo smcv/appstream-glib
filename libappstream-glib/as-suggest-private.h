@@ -38,6 +38,10 @@ gboolean	 as_suggest_node_parse		(AsSuggest	*suggest,
 						 GNode		*node,
 						 AsNodeContext	*ctx,
 						 GError		**error);
+gboolean	 as_suggest_node_parse_dep11	(AsSuggest	*suggest,
+						 GNode		*node,
+						 AsNodeContext	*ctx,
+						 GError		**error);
 
 G_END_DECLS
 

@@ -27,7 +27,6 @@
 #define __AS_SUGGEST_H
 
 #include <glib-object.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
 
 G_BEGIN_DECLS
 
@@ -51,13 +50,13 @@ struct _AsSuggestClass
 /**
  * AsSuggestKind:
  * @AS_SUGGEST_KIND_UNKNOWN:		Type invalid or not known
- * @AS_SUGGEST_KIND_SOURCE:		xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ * @AS_SUGGEST_KIND_UPSTREAM:		Upstream-specified suggestion
  *
  * The suggest type.
  **/
 typedef enum {
 	AS_SUGGEST_KIND_UNKNOWN,
-	AS_SUGGEST_KIND_SOURCE,
+	AS_SUGGEST_KIND_UPSTREAM,
 	/*< private >*/
 	AS_SUGGEST_KIND_LAST
 } AsSuggestKind;
@@ -76,7 +75,7 @@ GPtrArray	*as_suggest_get_ids		(AsSuggest	*suggest);
 void		 as_suggest_set_kind		(AsSuggest	*suggest,
 						 AsSuggestKind	 kind);
 void		 as_suggest_add_id		(AsSuggest	*suggest,
-						 GPtrArray	*pixbuf);
+						 const gchar	*id);
 
 G_END_DECLS
 

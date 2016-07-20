@@ -58,4 +58,4 @@ size, AS_TAG_SIZE
 translation, AS_TAG_TRANSLATION
 content_rating, AS_TAG_CONTENT_RATING
 content_attribute, AS_TAG_CONTENT_ATTRIBUTE
-suggests, AS_TAG_SUGGESTS
+suggest, AS_TAG_SUGGEST

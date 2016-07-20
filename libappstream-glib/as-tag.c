@@ -194,7 +194,7 @@ as_tag_to_string (AsTag tag)
 		"translation",
 		"content_rating",
 		"content_attribute",
-		"suggests",
+		"suggest",
 		NULL };
 	if (tag > AS_TAG_LAST)
 		tag = AS_TAG_LAST;

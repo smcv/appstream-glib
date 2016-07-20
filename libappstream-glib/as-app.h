@@ -34,6 +34,7 @@
 #include "as-provide.h"
 #include "as-release.h"
 #include "as-screenshot.h"
+#include "as-suggest.h"
 #include "as-content-rating.h"
 #include "as-translation.h"
 

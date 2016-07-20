@@ -3443,10 +3443,10 @@ as_app_node_insert (AsApp *app, GNode *parent, AsNodeContext *ctx)
 		as_translation_node_insert (bu, node_app, ctx);
 	}
 
-	/* <suggests> */
+	/* <suggest> */
 	for (i = 0; i < priv->suggests->len; i++) {
-		AsSuggest *bu = g_ptr_array_index (priv->suggests, i);
-		as_suggest_node_insert (bu, node_app, ctx);
+		AsSuggest *suggest = g_ptr_array_index (priv->suggests, i);
+		as_suggest_node_insert (suggest, node_app, ctx);
 	}
 
 	/* <name> */
@@ -3705,8 +3705,8 @@ as_app_node_parse_child (AsApp *app, GNode *n, AsAppParseFlags flags,
 		break;
 	}
 
-	/* <suggests> */
-	case AS_TAG_SUGGESTS:
+	/* <suggest> */
+	case AS_TAG_SUGGEST:
 	{
 		g_autoptr(AsSuggest) ic = NULL;
 		ic = as_suggest_new ();
